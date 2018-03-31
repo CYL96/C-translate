@@ -11,8 +11,9 @@
 #include<strings.h>
 #include<sqlite3.h>
 #include<sys/types.h>
-int create_sqlite(sqlite3 *db)
+int create_sqlite()
 {
+    sqlite3 *db;
     char *errmsg=NULL;
     char buf[100];
     if(sqlite3_open("dirt.db",&db)!=SQLITE_OK)
@@ -29,6 +30,7 @@ int create_sqlite(sqlite3 *db)
         sqlite3_close(db);
         return -1;
     }
+    sqlite3_close(db);
     return 0;
 }
 int txt_to_db(sqlite3 *db)
@@ -54,7 +56,7 @@ int txt_to_db(sqlite3 *db)
    // char *q=fgets(buf,sizeof(buf),fd);
     while(fgets(buf,sizeof(buf),fd) != NULL )
     {
-       // buf[strlen(buf)-1]=' ';
+        buf[strlen(buf)-1]=' ';
         p=buf;
         while(buf[j]!=' ')
         {
@@ -62,28 +64,29 @@ int txt_to_db(sqlite3 *db)
             i++;
             j++;
         }
-        word[i]='\0';
+        //word[i]='\0';
         while(buf[j]==' ')
         {
+            i++;
             j++;
         }
+        /*
         i=0;
         memset(translation,0,sizeof(translation));
-        while(buf[j] != '\n')
+        while(buf[j] != '\0')
         {
             translation[i]=buf[j];
             j++;
             i++;
         }
+        */
         translation[i]='\0';
         printf("%d\n",i); 
         printf("%s\n",buf);
         printf("=%s=\n",word);
-       // printf("=%s=\n",p);
-        printf(" =%s= \n",translation);
+       // printf(" =%s= \n",translation);
         memset(udata,0,sizeof(udata));
-        sprintf(udata,"insert into userinfo values('hello','world');");
-        printf("=%s=\n",udata);
+        sprintf(udata,"insert into userinfo values('%s','%s');",word,&buf[i]);
         if(sqlite3_exec(db,udata,NULL,NULL,&errmsg)!=SQLITE_OK)
         {
             printf("errmsg2:%s\n",errmsg);
@@ -91,7 +94,7 @@ int txt_to_db(sqlite3 *db)
             close(fd);
             return -1;
         }
-        i=0;
+        i=0,j=0;
         memset(buf,0,sizeof(buf));
         memset(word,0,sizeof(word));
        // q=fgets(buf,sizeof(buf),fd);
@@ -104,8 +107,13 @@ int main()
 {
     sqlite3 *db;
     
-    if(create_sqlite(db)==0)
+    if(create_sqlite()==0)
     {
+        if(sqlite3_open("dirt.db",&db)!=SQLITE_OK)
+        {
+            printf("error:%s\n",sqlite3_errmsg(db));
+            return -1;
+        }
         txt_to_db(db);
         sqlite3_close(db);
     }
