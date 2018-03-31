@@ -43,7 +43,7 @@ int txt_to_db(sqlite3 *db)
         return -1;
     }
     char buf[1024];
-    char word[20];
+    char word[40];
     char translation[1024];
     char udata[100];
     int offset=0;
@@ -56,7 +56,15 @@ int txt_to_db(sqlite3 *db)
    // char *q=fgets(buf,sizeof(buf),fd);
     while(fgets(buf,sizeof(buf),fd) != NULL )
     {
-        buf[strlen(buf)-1]=' ';
+        while((o=strstr(buf,"\n"))!=NULL)
+        {
+            *o=' ';
+        }
+        while((o=strstr(buf,"'"))!=NULL)
+        {
+            *o=' ';
+        }
+        //buf[strlen(buf)-1]=' ';
         p=buf;
         while(buf[j]!=' ')
         {
@@ -80,7 +88,7 @@ int txt_to_db(sqlite3 *db)
             i++;
         }
         */
-        translation[i]='\0';
+       // translation[i]='\0';
         printf("%d\n",i); 
         printf("%s\n",buf);
         printf("=%s=\n",word);
